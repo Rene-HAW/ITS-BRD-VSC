@@ -1,34 +1,68 @@
 /**
   ******************************************************************************
   * @file    main.c
-  * @author  Franz Korf
-  * @brief   Kleines Testprogramm fuer neu erstelle Fonts.
+  * @author  René Rudzki, Sajad Nazari
+  * @brief   Implementierung eines RPN Taschenrechners
+  *			 über Touch-Display des ITS-Boards.
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
 
-#include "stm32f4xx_hal.h"
 #include "init.h"
-#include "LCD_GUI.h"
-#include "LCD_Touch.h"
-#include "lcd.h"
-#include "fontsFLASH.h"
-#include "additionalFonts.h"
-#include "error.h"
+#include "display.h"
+#include "scanner.h"
+#include "token.h"
+#include "err_num.h"
+#include "stack.h"
+#include "operations.h"
+#include "msg_handler.h"
 
+static T_token input = {UNEXPECTED, 0};
+static int state = EOK;
 
 int main(void) {
-	initITSboard();    // Initialisierung des ITS Boards
+	initITSboard();    // Initialisierung des ITS-Boards	
+	initDisplay();    // Initialisierung des Displays
 	
-	GUI_init(DEFAULT_BRIGHTNESS);   // Initialisierung des LCD Boards mit Touch
-	TP_Init(false);                 // Initialisierung des LCD Boards mit Touch
-
-  // Begruessungstext	
-	lcdPrintlnS("Hallo liebes TI-Labor (c-project)");
-	
-	// Test in Endlosschleife
+	// Ausführung in Endlosschleife
 	while(1) {
-		HAL_Delay(10000);
+		input = nextToken();
+
+		switch (input.tok) {
+			case NUMBER:
+				state = stackPush(input.val); break;
+			
+			case OVERFLOW:
+				state = OVERFLOW_ERR; break;
+			
+			case PLUS: case MINUS: case MULT: case DIV: case SWAP:
+				state = calculate(input.tok); break;
+			
+			case DOUBLE:
+				state = duplicate(); break;
+
+			case PRT: case PRT_ALL:
+				clearStdout();
+				printOps(input.tok); break;
+
+			case CLEAR:
+				clearStack();
+				clearStdout(); break;
+
+			case UNEXPECTED:
+				state = UNEX_INPUT_ERR;
+		}
+
+		if (state != EOK) {
+			setErrMode();
+			printMessage(state);
+
+			while (input.tok != CLEAR) { input = nextToken(); }
+
+			clearStack();
+			setNormalMode();
+			state = EOK;
+		}
 	}
 }
 
