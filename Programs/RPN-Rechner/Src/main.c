@@ -1,28 +1,26 @@
 /**
   ******************************************************************************
   * @file    main.c
-  * @author  René Rudzki, Sajad Nazari
+  * @author  René Rudzki
   * @brief   Implementierung eines RPN Taschenrechners
   *			 über Touch-Display des ITS-Boards.
   ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
+*/
 
+/* Includes ------------------------------------------------------------------*/
 #include "init.h"
-#include "display.h"
+#include "operations.h"
+#include "output.h"
 #include "scanner.h"
 #include "token.h"
-#include "err_num.h"
-#include "stack.h"
-#include "operations.h"
-#include "msg_handler.h"
-
-static T_token input = {UNEXPECTED, 0};
-static int state = EOK;
+#include "code_num.h"
 
 int main(void) {
 	initITSboard();    // Initialisierung des ITS-Boards	
-	initDisplay();    // Initialisierung des Displays
+	initOutput();      // Initialisierung des Displays
+
+	int state = EOK;
+	T_token input;
 	
 	// Ausführung in Endlosschleife
 	while(1) {
@@ -30,38 +28,31 @@ int main(void) {
 
 		switch (input.tok) {
 			case NUMBER:
-				state = stackPush(input.val); break;
+				state = rpn_enterNumber(input.val); break;
 			
 			case OVERFLOW:
 				state = OVERFLOW_ERR; break;
 			
 			case PLUS: case MINUS: case MULT: case DIV: case SWAP:
-				state = calculate(input.tok); break;
+				state = rpn_binaryOperations(input.tok); break;
 			
 			case DOUBLE:
-				state = duplicate(); break;
+				state = rpn_duplicate(); break;
 
 			case PRT: case PRT_ALL:
-				clearStdout();
-				printOps(input.tok); break;
+				rpn_printOperations(input.tok); break;
 
 			case CLEAR:
-				clearStack();
-				clearStdout(); break;
+				clearOutput();
+				rpn_clearMemory(); break;
 
 			case UNEXPECTED:
-				state = UNEX_INPUT_ERR;
+				state = INPUT_ERR;
 		}
 
-		if (state != EOK) {
-			setErrMode();
-			printMessage(state);
-
-			while (input.tok != CLEAR) { input = nextToken(); }
-
-			clearStack();
-			setNormalMode();
-			state = EOK;
+		if (state < EOK) {
+			printError(state);
+			rpn_clearMemory();
 		}
 	}
 }

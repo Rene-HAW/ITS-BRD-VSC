@@ -174,13 +174,23 @@ project:
     - group: Program/User/Inc
       files:
         - file: ../../ITS_BRD_LIB/Inc/lcd.h
-
+        - file: Inc/display.h
+        - file: Inc/scanner.h
+        - file: Inc/stack.h
+        - file: Inc/operations.h
+        - file: Inc/output.h
+        - file: Inc/token.h
+        - file: Inc/code_num.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
       files:
         - file: Src/main.c
-
+        - file: Src/display.c
+        - file: Src/scanner.c
+        - file: Src/stack.c
+        - file: Src/operations.c
+        - file: Src/output.c
 
   components:
     - component: ARM::CMSIS:CORE

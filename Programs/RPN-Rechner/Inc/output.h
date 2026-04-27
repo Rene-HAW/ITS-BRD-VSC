@@ -1,5 +1,15 @@
-#ifndef MSG_HANDLER_H
-#define MSG_HANDLER_H
+#ifndef RPN_OUTPUT_H
+#define RPN_OUTPUT_H
+
+/**
+ *
+ */
+void initOutput(void);
+
+/**
+ *
+ */
+void clearOutput(void);
 
 /*
  ****************************************************************************************
@@ -13,13 +23,18 @@ void printNumber(int value);
 
 /*
  ****************************************************************************************
- *  @brief      Gibt vordefiniert Nachrichten anhand eines Fehlercodes aus
+ *  @brief      Gibt vordefinierte Nachrichten anhand einer Codenummer aus
  *
- *  @param      num => Fehlercode
+ *  @param      code => Codenummer
  *
  *  @return     void
  ****************************************************************************************/
-void printMessage(int num);
+void printMessage(int code);
 
-#endif /* MSG_HANDLER_H */
+/**
+ *
+ */
+void printError(int code);
+
+#endif /* RPN_OUTPUT_H */
 // EOF

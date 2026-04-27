@@ -1,71 +1,82 @@
 /**
-  * @file   operations.c
-  * @author René Rudzki, Sajad Nazari
-  * @brief  Implementierung der Operationen des Taschenrechners
-  */
+ * @file   operations.c
+ * @author René Rudzki, Sajad Nazari
+ * @brief  Implementierung der Operationen des Taschenrechners
+*/
 
 #include "operations.h"
 #include "stack.h"
+#include "output.h"
 #include "limits.h"
 #include "token.h"
-#include "err_num.h"
-#include "msg_handler.h"
+#include "code_num.h"
 
 static int add(int num_a, int num_b) {
-    if  (  (num_a > 0) && (num_b > 0) && (num_b > INT_MAX - num_a)
-        || (num_a < 0) && (num_b < 0) && (num_b < INT_MIN - num_a)
+    if  (  ( (num_a > 0) && (num_b > 0) && (num_a > INT_MAX - num_b) )
+        || ( (num_a < 0) && (num_b < 0) && (num_a < INT_MIN - num_b) )
         ) {
             return ARITHMETIC_ERR;
         }
     int result = num_a + num_b;
-    stackPush(result);
-    return EOK;
+    return stackPush(result);
 }
 
 static int subtract(int num_a, int num_b) {
-    if  (  (num_a < 0) && (num_b > -1) && (num_b > INT_MAX + num_a)
-        || (num_a > 0) && (num_b < -1) && (num_b < INT_MIN + num_a)
+    if  (  ( (num_a < -1) && (num_b > 0) && (num_a < INT_MIN + num_b) )
+        || ( (num_a > -1) && (num_b < 0) && (num_a > INT_MAX + num_b) )
         ) {
             return ARITHMETIC_ERR;
         }
-    int result = num_b - num_a;
-    stackPush(result);
-    return EOK;
+    int result = num_a - num_b;
+    return stackPush(result);
 }
 
 static int multiply(int num_a, int num_b) {
-    if  (  (num_a > 1) && (num_b > 1) && (num_b > INT_MAX / num_a)
-        || (num_a < 0) && (num_b < 0) && (num_b < INT_MAX / num_a)    // > wird zu < wegen Teilung durch Minuszahl
+    if  (  ( (num_a > 1) && (num_b > 1) && (num_a > INT_MAX / num_b) )
+        || ( (num_a < 0) && (num_b < 0) && (num_a < INT_MAX / num_b) )
 
-        || (num_a > 1) && (num_b < 0) && (num_b < INT_MIN / num_a)
-        || (num_a < 0) && (num_b > 1) && (num_b > INT_MIN / num_a)    // < wird zu > wegen Teilung durch Minuszahl
+        || ( (num_a > 1) && (num_b < 0) && (num_a > INT_MIN / num_b) )
+        || ( (num_a < 0) && (num_b > 1) && (num_a < INT_MIN / num_b) )
         ) {
             return ARITHMETIC_ERR;
         }
     int result = num_a * num_b;
-    stackPush(result);
-    return EOK;
+    return stackPush(result);
 }
 
 static int divide(int num_a, int num_b) {
-    if (num_a == 0) {
-        return DIVIDE0_ERR;
+    if (num_b == 0) {
+        return DIVIDE_0_ERR;
     }
-    if ( (num_b == INT_MIN) && (num_a == -1) ) {
+    if ( (num_a == INT_MIN) && (num_b == -1) ) {
         return ARITHMETIC_ERR;
     }
-    int result = num_b / num_a;
-    stackPush(result);
-    return EOK;
+    int result = num_a / num_b;
+    return stackPush(result);
 }
 
-int calculate(char token) {
+static int peekTop(int *value) {
+    int state = stackPeek(value, 0);
+    if (state == STACK_EMPTY) { 
+        clearOutput();
+        printMessage(state);
+    }
+    return state;
+}
+
+//-----------------------------------------------------------------------------
+
+int rpn_enterNumber(int num) {
+    return stackPush(num);
+}
+
+int rpn_binaryOperation(char token) {
     int num_a; int num_b;
     int state;
 
-    state = stackPop(&num_a);
-    if (state != EOK) { return state; }
     state = stackPop(&num_b);
+    if (state != EOK) { return state; }
+    state = stackPop(&num_a);
     if (state != EOK) { return state; }
 
     switch (token) {
@@ -78,47 +89,42 @@ int calculate(char token) {
         case DIV:
             state = divide(num_a, num_b); break;
         case SWAP:
-            stackPush(num_a);
             stackPush(num_b);
-            break;
+            stackPush(num_a); break;
         default:
-            state = UNEX_INPUT_ERR;
+            state = INPUT_ERR;
     }
     return state;
 }
 
-int duplicate(void) {
-    int num_a;
-    int state;
-
-    state = stackPop(&num_a);
-    if (state != EOK) { return state; }
-
-    stackPush(num_a);
-    stackPush(num_a);
-    return EOK;
+int rpn_duplicate(void) {
+    int num;
+    int state = peekTop(&num);
+    if (state == EOK) { state = stackPush(num); }
+    return state;
 }
 
-void printOps(char token) {
-    int num_a; int num_b;
-    int state;
-    int depth = 0;
-    
-    state = stackPeek(&num_a, depth);
-    if (state == STACK_EMPTY) { printMessage(state); return; }
+void rpn_printOperations(char token) {
+    int num;
+    int state = peekTop(&num);
+    if (state == EOK) {
+        clearOutput();
+        printNumber(num);
 
-    printNumber(num_a);
-    
-    if (token == PRT_ALL) {
-        depth++;
-        state = stackPeek(&num_a, depth);
+        if (token == PRT_ALL) {
+            int depth = 1;
+            state = stackPeek(&num, depth);
+            while (state == EOK) {
+                printNumber(num);
+                depth++;
+                state = stackPeek(&num, depth);
+            } //while
+        } //PRT_ALL
+    } //EOK
+} //func
 
-        while (state == EOK) {
-            printNumber(num_a);
-            depth++;
-            state = stackPeek(&num_a, depth);
-        }
-    }
+void rpn_clearMemory(void) {
+    clearStack();
 }
 
 //EOF

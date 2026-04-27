@@ -1,5 +1,10 @@
-#ifndef OPERATIONS_H
-#define OPERATIONS_H
+#ifndef RPN_OPERATIONS_H
+#define RPN_OPERATIONS_H
+
+/**
+ *
+ */
+int rpn_enterNumber(int num);
 
 /*
  ****************************************************************************************
@@ -10,7 +15,7 @@
  *
  *  @return     int => Statuscode der Funktion
  ****************************************************************************************/
-int calculate(char token);
+int rpn_binaryOperations(char token);
 
 /*
  ****************************************************************************************
@@ -18,18 +23,23 @@ int calculate(char token);
  *
  *  @return     int => Statuscode der Funktion
  ****************************************************************************************/
-int duplicate(void);
+int rpn_duplicate(void);
 
 /*
  ****************************************************************************************
- *  @brief      Gibt den obersten oder alle Elemente im Stack
+ *  @brief      Gibt das obersten oder alle Elemente im Stack
  *              auf den Bildschirm aus.
  *
  *  @param      token => PRT oder PRT_ALL Token
  *
  *  @return     void
  ****************************************************************************************/
-void printOps(char token);
+void rpn_printOperations(char token);
 
-#endif /* OPERATIONS_H */
+/**
+ *
+ */
+void rpn_clearMemory(void);
+
+#endif /* RPN_OPERATIONS_H */
 // EOF
