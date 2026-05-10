@@ -8,6 +8,7 @@
 #include "display.h"
 #include "scanner.h"
 #include "token.h"
+#include "limits.h"
 #include "code_num.h"
 
 #define STRING_SIZE 13    // Sign + Max Stellen eines Integers + \n + \0
@@ -27,9 +28,14 @@ void printNumber(int value) {
 
     // Anpassungen wenn negative Zahl
     if (value < 0) {
-        value = -value;
         str[i] = '-';
         i++; neg = 1;
+        
+        if (value == INT_MIN) {
+            str[i] = '8';
+            i++; value /= 10;
+        }
+        value = -value;
     }
 
     // Zahl in String konvertieren mit Modulo 10 Strategie

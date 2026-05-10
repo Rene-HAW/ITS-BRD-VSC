@@ -7,8 +7,8 @@
 #include "operations.h"
 #include "stack.h"
 #include "output.h"
-#include "limits.h"
 #include "token.h"
+#include "limits.h"
 #include "code_num.h"
 
 static int add(int num_a, int num_b) {
