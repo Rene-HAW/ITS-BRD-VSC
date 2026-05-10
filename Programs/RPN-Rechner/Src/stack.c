@@ -1,8 +1,8 @@
 /**
-  * @file   stack.c
-  * @author René Rudzki
-  * @brief  Implementierung eines Stacks (LIFO Queue)
-  *         als Speicher für den Taschenrechner
+ *  @file   stack.c
+ *  @author René Rudzki
+ *  @brief  Implementierung eines Stacks (LIFO Queue)
+ *          als Speicher für den Taschenrechner
 */
 
 #include "stack.h"

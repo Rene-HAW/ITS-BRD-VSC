@@ -1,7 +1,7 @@
 /**
- * @file   operations.c
- * @author René Rudzki, Sajad Nazari
- * @brief  Implementierung der Operationen des Taschenrechners
+ *  @file   operations.c
+ *  @author René Rudzki
+ *  @brief  Implementierung der Operationen des Taschenrechners
 */
 
 #include "operations.h"
@@ -70,7 +70,7 @@ int rpn_enterNumber(int num) {
     return stackPush(num);
 }
 
-int rpn_binaryOperation(char token) {
+int rpn_binaryOperations(char token) {
     int num_a; int num_b;
     int state;
 

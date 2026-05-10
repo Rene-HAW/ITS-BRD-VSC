@@ -1,13 +1,13 @@
 /**
-  ******************************************************************************
-  * @file    main.c
-  * @author  René Rudzki
-  * @brief   Implementierung eines RPN Taschenrechners
-  *			 über Touch-Display des ITS-Boards.
-  ******************************************************************************
+ ******************************************************************************
+ *  @file    main.c
+ *  @author  René Rudzki
+ *  @brief   Implementierung eines RPN Taschenrechners
+ *			 über Touch-Display des ITS-Boards.
+ ******************************************************************************
 */
 
-/* Includes ------------------------------------------------------------------*/
+/* Includes -----------------------------------------------------------------*/
 #include "init.h"
 #include "operations.h"
 #include "output.h"
@@ -53,6 +53,7 @@ int main(void) {
 		if (state < EOK) {
 			printError(state);
 			rpn_clearMemory();
+			state = EOK;
 		}
 	}
 }

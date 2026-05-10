@@ -1,7 +1,7 @@
 /**
- * @file   output.c
- * @author René Rudzki
- * @brief  Modul zur Ausgabe von Nachrichten auf den Bildschirm
+ *  @file   output.c
+ *  @author René Rudzki
+ *  @brief  Modul zur Ausgabe von Nachrichten auf den Bildschirm
 */
 
 #include "output.h"
@@ -63,23 +63,24 @@ void printMessage(int code) {
         case STACK_EMPTY:
             printStdout("Stack leer."); break;
         case OVERFLOW_ERR:
-            printStdout("Stack Overflow!\n(Reset mit C)"); break;
+            printStdout("Stack Overflow!"); break;
         case UNDERFLOW_ERR:
-            printStdout("Stack Underflow!\n(Reset mit C)"); break;
+            printStdout("Stack Underflow!"); break;
         case ARITHMETIC_ERR:
-            printStdout("Arithmetic Overflow!\n(Reset mit C)"); break;
+            printStdout("Arithmetic Overflow!"); break;
         case DIVIDE_0_ERR:
-            printStdout("Durch 0 geteilt!\n(So moege Sie der\nBlitz treffen.)"); break;
+            printStdout("Durch 0 geteilt!"); break;
         case INPUT_ERR:
-            printStdout("Unexpected Input!\n(Reset mit C)");
+            printStdout("Unexpected Input!");
     }
 }
 
 void printError(int code) {
     setErrMode();
 	printMessage(code);
+    printStdout("\n(Reset mit C)");
     T_token input = nextToken();
-    while (input.tok != PRT_ALL) { input = nextToken(); }
+    while (input.tok != CLEAR) { input = nextToken(); }
 	setNormalMode();
 }
 
