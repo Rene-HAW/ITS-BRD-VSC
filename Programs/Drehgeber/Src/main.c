@@ -29,7 +29,6 @@ void errorHandler(void) {
   resetDisplayValues();
 }
 
-
 int main(void) {
   // Initialisierung ITS Board und interne Variabeln
   initITSboard();
@@ -39,9 +38,8 @@ int main(void) {
 
   // Initialisierung LCD mit Text und Ausgabe-Buffern
   initDisplay();
-  char bufAngle[PRINT_SIZE];
-  char bufSpeed[PRINT_SIZE];
-  int nextChar = PRINT_SIZE;
+  PrintBuffer bufAngle = newBuffer();
+  PrintBuffer bufSpeed = newBuffer();
 
   // Initialisierung Timer und Zeitfenster direkt vor super-loop öffnen
   initTimer();
@@ -77,10 +75,13 @@ int main(void) {
 
     if (timeFrame >= MIN_TIME) {
       if ( (move > STANDSTILL) || (timeFrame >= MAX_TIME) ) {
+        char bufString[PRINT_SIZE];
 
-        calcAngle(bufAngle, steps);
-        calcSpeed(bufSpeed, steps, timeFrame);
-        nextChar = 0;
+        calcAngle(bufString, steps);
+        updateBuffer(&bufAngle, bufString);
+
+        calcSpeed(bufString, steps, timeFrame);
+        updateBuffer(&bufSpeed, bufString);
 
         frameStart = frameEnd;
       }
@@ -92,10 +93,16 @@ int main(void) {
     
     //setGPIOpin(OUT_STATE, OUT11, true);  // Zeitmessung: LCD-Ausgabe (start)
 
-    if ( nextChar < (PRINT_SIZE-1) ) {
-      printAngle(bufAngle[nextChar], nextChar);
-      printSpeed(bufSpeed[nextChar], nextChar);
-      nextChar++;
+    int index = bufAngle.printIndex[bufAngle.next];
+    if (index != NO_PRINT) {
+      printAngle(bufAngle.string[index], index);
+      bufAngle.next++;
+    }
+
+    index = bufSpeed.printIndex[bufSpeed.next];
+    if (index != NO_PRINT) {
+      printSpeed(bufSpeed.string[index], index);
+      bufSpeed.next++;
     }
 
     //setGPIOpin(OUT_STATE, OUT11, false);  // Zeitmessung: LCD-Ausgabe (ende)
@@ -108,7 +115,8 @@ int main(void) {
       state = EOK;
       move = STANDSTILL;
       steps = 0;
-      nextChar = PRINT_SIZE;
+      bufAngle = newBuffer();
+      bufSpeed = newBuffer();
       frameStart = getTimeStamp();
     }
 	}
