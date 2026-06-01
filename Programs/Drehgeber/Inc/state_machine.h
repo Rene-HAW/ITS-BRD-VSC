@@ -1,7 +1,7 @@
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
-int encodeState(int in1State, int in0State);
+int encodeInput(int in1State, int in0State);
 
 void resetMachine(void);
 

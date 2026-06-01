@@ -1,4 +1,5 @@
 #include "operations.h"
+#include "lcd_print.h"
 #include "timer.h"
 #include <stdio.h>
 
@@ -11,47 +12,23 @@ double calcTimeFrame(uint32_t start, uint32_t end) {
     } else {
         frame = end - start;
     }
-    return (frame / TICKS_PER_US) / 1000;  /* US zu MS */
+    return (frame / TICKS_PER_US) / 1000;  /* us zu ms */
 }
 
-void calcAngle(double steps, char out[]) {
+void calcAngle(char out[], int steps) {
     double angle = steps * (360.0 / STEPS_PER_CYCLE);
-    sprintf(out, "%-*.1lf", (PRINT_SIZE - 1), angle);
+    sprintf(out, "%-*.1lf", (PRINT_SIZE-1), angle);
 }
 
-void calcSpeed(double stepsOfFrame, double timeFrame, char out[]) {
-    if (stepsOfFrame < 0) {
-        stepsOfFrame = -stepsOfFrame;
-    }
-    double angleOfFrame = stepsOfFrame * (360.0 / STEPS_PER_CYCLE);
+void calcSpeed(char out[], int steps, double timeFrame) {
+    static double lastAngle = 0.0;
+    double newAngle = steps * (360.0 / STEPS_PER_CYCLE);
+    double angleOfFrame = newAngle - lastAngle;
+    lastAngle = newAngle;
+    if (angleOfFrame < 0) angleOfFrame = -angleOfFrame;
+
     double speed = (angleOfFrame / timeFrame) * 1000;  /* Grad/ms zu Grad/s */
-    sprintf(out, "%-*.2lf", (PRINT_SIZE - 1), speed);
-}
-
-
-void updateBuffer(PrintBuffer *buffer, char newString[]) {
-    char *oldString = buffer->string;
-    int printCounter = 0;
-
-    for (int i = 0; i < (PRINT_SIZE - 1); i++) {
-        if (oldString[i] != newString[i]) {
-            oldString[i] = newString[i];
-            buffer->printIndex[printCounter] = i;
-            printCounter++;
-        }
-    }
-    buffer->printIndex[printCounter] = NO_PRINT;
-    buffer->next = 0;
-}
-
-PrintBuffer newBuffer(char initString[]) {
-    PrintBuffer buffer;
-    for (int i = 0; i < PRINT_SIZE; i++) {
-        buffer.string[i] = initString[i];
-    }
-    buffer.printIndex[0] = NO_PRINT;
-    buffer.next = 0;
-    return buffer;
+    sprintf(out, "%-*.2lf", (PRINT_SIZE-1), speed);
 }
 
 // EOF

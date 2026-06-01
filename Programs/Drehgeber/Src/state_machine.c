@@ -1,100 +1,87 @@
 #include "state_machine.h"
-#include "general_def.h"
+#include "main.h"
 
-static char bufPhase = 's';
+static char currentPhase = 's';
 
 static int fsm(char newPhase) {
-    switch (bufPhase) {
-
+    switch (currentPhase) {
         case 'a':
             switch (newPhase) {
                 case 'a':
                     return STANDSTILL;
-                
                 case 'b':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return FORWARD;
-                
                 case 'd':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return BACKWARD;
-                
                 default:
-                    bufPhase = 'e';
+                    currentPhase = 'e';
                     return INTERNAL_ERR;
             }
 
         case 'b':
             switch (newPhase) {
                 case 'a':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return BACKWARD;
-                
                 case 'b':
                     return STANDSTILL;
-                
                 case 'c':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return FORWARD;
-                
                 default:
-                    bufPhase = 'e';
+                    currentPhase = 'e';
                     return INTERNAL_ERR;
             }
 
         case 'c':
             switch (newPhase) {
                 case 'b':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return BACKWARD;
-                
                 case 'c':
                     return STANDSTILL;
-                
                 case 'd':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return FORWARD;
-                
                 default:
-                    bufPhase = 'e';
+                    currentPhase = 'e';
                     return INTERNAL_ERR;
             }
 
         case 'd':
             switch (newPhase) {
                 case 'a':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return FORWARD;
-                
                 case 'c':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return BACKWARD;
-                
                 case 'd':
                     return STANDSTILL;
-                
                 default:
-                    bufPhase = 'e';
+                    currentPhase = 'e';
                     return INTERNAL_ERR;
             }
 
         case 's':
             switch (newPhase) {
                 case 'a': case 'b': case 'c': case 'd':
-                    bufPhase = newPhase;
+                    currentPhase = newPhase;
                     return STANDSTILL;
-                
                 default:
-                    bufPhase = 'e';
+                    currentPhase = 'e';
                     return INTERNAL_ERR;
             }
         
         default:
+            currentPhase = 'e';
             return INTERNAL_ERR;
     }
 }
 
-int encodeState(int in1State, int in0State) {
+int encodeInput(int in1State, int in0State) {
     char phase;
     if (in1State) {
         phase = (in0State) ? 'c' : 'b';
@@ -105,7 +92,7 @@ int encodeState(int in1State, int in0State) {
 }
 
 void resetMachine(void) {
-    bufPhase = 's';
+    currentPhase = 's';
 }
 
 // EOF

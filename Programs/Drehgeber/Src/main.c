@@ -1,18 +1,18 @@
 /**
-  ******************************************************************************
+  *****************************************************************************
   * @file    main.c
   * @author  René Rudzki
   * @brief   Ermittlung von Winkel und Geschwindigkeit anhand eines Drehgebers
-  ******************************************************************************
+  *****************************************************************************
   */
-/* Includes ------------------------------------------------------------------*/
+/* Includes ---------------------------------------------------------------- */
 
 #include "init.h"
-#include "general_def.h"
+#include "main.h"
 #include "gpio.h"
 #include "state_machine.h"
 #include "operations.h"
-#include "printer.h"
+#include "lcd_print.h"
 #include "timer.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,119 +20,95 @@
 #define MIN_TIME 250  // ms
 #define MAX_TIME 500  // ms
 
-bool errorHandler(void) {
-  setLEDstate(INTERNAL_ERR);
+void errorHandler(void) {
   int s6Pressed = 0;
-
-  while(s6Pressed != 1) {
-    s6Pressed = readGPIOpin(INPUT, S6);
-  }
+  while(s6Pressed != 1) s6Pressed = readGPIOpin(INPUT, S6);
 
   resetLED();
   resetMachine();
   resetDisplayValues();
-  return false;
 }
 
 
 int main(void) {
   // Initialisierung ITS Board und interne Variabeln
   initITSboard();
-  bool error = false;
   int state = EOK;
+  int move = STANDSTILL;
   int steps = 0;
-  int stepsOfFrame = 0;
 
   // Initialisierung LCD mit Text und Ausgabe-Buffern
   initDisplay();
-  PrintBuffer bufAngle = newBuffer(INIT_ANGLE);
-  PrintBuffer bufSpeed = newBuffer(INIT_SPEED);
+  char bufAngle[PRINT_SIZE];
+  char bufSpeed[PRINT_SIZE];
+  int nextChar = PRINT_SIZE;
 
   // Initialisierung Timer und Zeitfenster direkt vor super-loop öffnen
   initTimer();
 	uint32_t frameStart = getTimeStamp();
-	
 
+  
   // Beginn der super-loop
 	while(1) {
-    //setGPIOpin(OUTPUT_STATE, OUT10, true);  // Zeitmessung: super-loop (start)
+    // Eingabe - Einlesen der Sensoren
+    //setGPIOpin(OUT_STATE, OUT10, true);  // Zeitmessung: super-loop (start)
 
-		// Eingabe - Einlesen der Sensoren
     int in0State = readGPIOpin(INPUT, IN0);
     int in1State = readGPIOpin(INPUT, IN1);
-    uint32_t frameEnd = getTimeStamp();
 
-
+    // ------------------------------------------------------------------------
     // Update des Zustands
-    state = encodeState(in1State, in0State);
-    error = (state == INTERNAL_ERR) || (in0State == INTERNAL_ERR) || (in1State == INTERNAL_ERR);
+    if ( (in1State == INTERNAL_ERR) || (in0State == INTERNAL_ERR) )
+      move = INTERNAL_ERR;
+    else move = encodeInput(in1State, in0State);
     
-    switch(state) {
+    switch (move) {
       case FORWARD:
-        steps++;
-        stepsOfFrame++;
-        break;
+        steps++; break;
       case BACKWARD:
-        steps--;
-        stepsOfFrame--;
-        break;
+        steps--; break;
+      case INTERNAL_ERR:
+        state = INTERNAL_ERR;
     }
-
-
+    // ------------------------------------------------------------------------
     // Berechnung der neuen Werte fuer die Aktoren
+    uint32_t frameEnd = getTimeStamp();
     double timeFrame = calcTimeFrame(frameStart, frameEnd);
 
     if (timeFrame >= MIN_TIME) {
-      if ( (state == FORWARD) || (state == BACKWARD) || (timeFrame >= MAX_TIME) ) {
-        
-        char bufOutput[PRINT_SIZE];
+      if ( (move > STANDSTILL) || (timeFrame >= MAX_TIME) ) {
 
-        calcAngle(steps, bufOutput);
-        updateBuffer(&bufAngle, bufOutput);
+        calcAngle(bufAngle, steps);
+        calcSpeed(bufSpeed, steps, timeFrame);
+        nextChar = 0;
 
-        calcSpeed(stepsOfFrame, timeFrame, bufOutput);
-        updateBuffer(&bufSpeed, bufOutput);
-
-        stepsOfFrame = 0;
         frameStart = frameEnd;
       }
     }
-
-
+    // ------------------------------------------------------------------------
     // Ausgabe - Treiben der Aktoren
-    setLEDstate(state);
+    setLEDstate(move);
     setLEDcounter(steps);
     
-    //setGPIOpin(OUTPUT_STATE, OUT11, true);  // Zeitmessung: LCD Ausgabe (start)
+    //setGPIOpin(OUT_STATE, OUT11, true);  // Zeitmessung: LCD-Ausgabe (start)
 
-    int index = bufAngle.printIndex[bufAngle.next];
-    if (index != NO_PRINT) {
-      
-      state = printAngle(bufAngle.string[index], index);
-      error = error || (state == INTERNAL_ERR);
-      bufAngle.next++;
+    if ( nextChar < (PRINT_SIZE-1) ) {
+      printAngle(bufAngle[nextChar], nextChar);
+      printSpeed(bufSpeed[nextChar], nextChar);
+      nextChar++;
     }
 
-    index = bufSpeed.printIndex[bufSpeed.next];
-    if (index != NO_PRINT) {
-      
-      state = printSpeed(bufSpeed.string[index], index);
-      error = error || (state == INTERNAL_ERR);
-      bufSpeed.next++;
-    }
+    //setGPIOpin(OUT_STATE, OUT11, false);  // Zeitmessung: LCD-Ausgabe (ende)
+    //setGPIOpin(OUT_STATE, OUT10, false);  // Zeitmessung: super-loop (ende)
 
-    //setGPIOpin(OUTPUT_STATE, OUT11, false);  // Zeitmessung: LCD Ausgabe (ende)
-    //setGPIOpin(OUTPUT_STATE, OUT10, false);  // Zeitmessung: super-loop (ende)
-
-
+    // ------------------------------------------------------------------------
     // Error Handling
-    if (error) {
-      error = errorHandler();
+    if (state < EOK) {
+      errorHandler();
       state = EOK;
+      move = STANDSTILL;
       steps = 0;
-      stepsOfFrame = 0;
-      bufAngle = newBuffer(INIT_ANGLE);
-      bufSpeed = newBuffer(INIT_SPEED);
+      nextChar = PRINT_SIZE;
       frameStart = getTimeStamp();
     }
 	}

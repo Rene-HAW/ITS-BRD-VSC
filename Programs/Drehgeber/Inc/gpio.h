@@ -8,7 +8,7 @@ int readGPIOpin(GPIO_TypeDef *GPIOx, int pin);
 
 int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool on);
 
-void setLEDstate(int state);
+void setLEDstate(int move);
 
 void setLEDcounter(int steps);
 
