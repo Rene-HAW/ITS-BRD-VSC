@@ -21,6 +21,7 @@
 #define MAX_TIME 500  // ms
 
 void errorHandler(void) {
+  setLEDstate(INTERNAL_ERR);
   int s6Pressed = 0;
   while(s6Pressed != 1) s6Pressed = readGPIOpin(INPUT, S6);
 
@@ -28,6 +29,7 @@ void errorHandler(void) {
   resetMachine();
   resetDisplayValues();
 }
+
 
 int main(void) {
   // Initialisierung ITS Board und interne Variabeln
@@ -45,7 +47,7 @@ int main(void) {
   initTimer();
 	uint32_t frameStart = getTimeStamp();
 
-  
+
   // Beginn der super-loop
 	while(1) {
     // Eingabe - Einlesen der Sensoren
@@ -57,17 +59,9 @@ int main(void) {
     // ------------------------------------------------------------------------
     // Update des Zustands
     if ( (in1State == INTERNAL_ERR) || (in0State == INTERNAL_ERR) )
-      move = INTERNAL_ERR;
-    else move = encodeInput(in1State, in0State);
-    
-    switch (move) {
-      case FORWARD:
-        steps++; break;
-      case BACKWARD:
-        steps--; break;
-      case INTERNAL_ERR:
-        state = INTERNAL_ERR;
-    }
+      state = INTERNAL_ERR;
+    else state = encodeInput(in1State, in0State, &move, &steps);
+
     // ------------------------------------------------------------------------
     // Berechnung der neuen Werte fuer die Aktoren
     uint32_t frameEnd = getTimeStamp();
@@ -90,18 +84,18 @@ int main(void) {
     // Ausgabe - Treiben der Aktoren
     setLEDstate(move);
     setLEDcounter(steps);
-    
+
     //setGPIOpin(OUT_STATE, OUT11, true);  // Zeitmessung: LCD-Ausgabe (start)
 
     int index = bufAngle.printIndex[bufAngle.next];
     if (index != NO_PRINT) {
-      printAngle(bufAngle.string[index], index);
+      state = printAngle(bufAngle.string[index], index);
       bufAngle.next++;
     }
 
     index = bufSpeed.printIndex[bufSpeed.next];
     if (index != NO_PRINT) {
-      printSpeed(bufSpeed.string[index], index);
+      state = printSpeed(bufSpeed.string[index], index);
       bufSpeed.next++;
     }
 

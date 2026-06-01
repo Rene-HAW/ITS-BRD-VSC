@@ -81,14 +81,27 @@ static int fsm(char newPhase) {
     }
 }
 
-int encodeInput(int in1State, int in0State) {
+int encodeInput(int in1State, int in0State, int *move, int *steps) {
     char phase;
     if (in1State) {
         phase = (in0State) ? 'c' : 'b';
     } else /* !in1State */ {
         phase = (in0State) ? 'd' : 'a';
     }
-    return fsm(phase);
+    switch ( fsm(phase) ) {
+        case FORWARD:
+            *move = FORWARD;
+            *steps += 1;
+            return EOK;
+        case BACKWARD:
+            *move = BACKWARD;
+            *steps -= 1;
+            return EOK;
+        case STANDSTILL:
+            *move = STANDSTILL;
+            return EOK;
+    }
+    return INTERNAL_ERR;
 }
 
 void resetMachine(void) {
