@@ -48,7 +48,7 @@ void setLEDstate(int move) {
 
 void setLEDcounter(int steps) {
     if (steps < 0) steps = -steps;
-    uint16_t stepsDisplayed = (steps < UINT8_MAX) ? steps : UINT8_MAX;
+    uint16_t stepsDisplayed = (uint16_t)( steps % (UINT8_MAX+1) );
     setGPIOpinMask(OUT_COUNT, stepsDisplayed);
 }
 
