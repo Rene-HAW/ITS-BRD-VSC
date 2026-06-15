@@ -3,8 +3,6 @@
 #include "input.h"
 #include "errorhandler.h"
 #include "lcd.h"
-#include "perfTimer.h"
-#include "timer.h"
 
 #define USE_DMA 
 
@@ -41,7 +39,7 @@ static int usbUartRead(char *buf, size_t len){
    // ToDo Check overflow of ring buffer
    static int nextReadPos = 0; // The next read from the DMA ring buffer reads the value from this position
    for (int i = 0; i < (int)len; i++){
-      int pos = SIZE_OF_RING_BUFFER - LL_DMA_GetDataLength(DMA1, LL_DMA_STREAM_1); 
+      int pos = (int)(SIZE_OF_RING_BUFFER - LL_DMA_GetDataLength(DMA1, LL_DMA_STREAM_1));
       if (nextReadPos == pos) return (int) i;
       buf[i] = ringBuffer[nextReadPos];
       nextReadPos = (nextReadPos + 1) % SIZE_OF_RING_BUFFER;
@@ -205,7 +203,7 @@ int COMread(char* buf, unsigned int size, unsigned int count){
       }
       buf[i] = (char) c;
    }
-   return count;
+   return (int)count;
 }
 
 //EOF

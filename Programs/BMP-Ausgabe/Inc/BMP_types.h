@@ -17,8 +17,6 @@
 #define BI_RGB	               0	     // uncompressed format
 #define BI_RLE8	               1	     // compressed format
 #define BMP_SIGNATURE          0x4d42
-#define BI_RGB                 0
-#define BI_RLE8                1
 #define MAX_COLOR_TABLE_SIZE   256
 
 typedef struct tagBITMAPFILEHEADER {

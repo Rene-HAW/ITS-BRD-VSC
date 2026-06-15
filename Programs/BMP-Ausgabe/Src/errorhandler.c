@@ -30,4 +30,5 @@ int printError(bool cnd, char *file, int line, char *msg, bool loopForEver) {
    }
    return EOK;
 }
+
 // EOF
