@@ -174,20 +174,23 @@ project:
     - group: Program/User/Inc
       files:
         - file: ../../ITS_BRD_LIB/Inc/lcd.h
-        - file: Inc/main.h
-        - file: Inc/errorhandler.h
         - file: Inc/perfTimer.h
-        - file: Inc/input.h
+        - file: Inc/errorhandler.h
         - file: Inc/MS_basetypes.h
         - file: Inc/BMP_types.h
+        - file: Inc/input.h
+        - file: Inc/colors.h
+        - file: Inc/display_bitmap.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
       files:
         - file: Src/main.c
-        - file: Src/errorhandler.c
         - file: Src/perfTimer.c
+        - file: Src/errorhandler.c
         - file: Src/input.c
+        - file: Src/colors.c
+        - file: Src/display_bitmap.c
 
   components:
     - component: ARM::CMSIS:CORE
