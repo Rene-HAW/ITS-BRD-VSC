@@ -181,6 +181,7 @@ project:
         - file: Inc/input.h
         - file: Inc/colors.h
         - file: Inc/display_bitmap.h
+        - file: Inc/gpio.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
@@ -191,6 +192,7 @@ project:
         - file: Src/input.c
         - file: Src/colors.c
         - file: Src/display_bitmap.c
+        - file: Src/gpio.c
 
   components:
     - component: ARM::CMSIS:CORE
