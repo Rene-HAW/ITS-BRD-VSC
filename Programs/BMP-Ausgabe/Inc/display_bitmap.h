@@ -1,15 +1,16 @@
 #ifndef _DISPLAY_BITMAP_H
 #define _DISPLAY_BITMAP_H
 
+#include "MS_basetypes.h"
 #include "BMP_types.h"
 
 void initBMPdisplay(void);
 
-void storePalette(int size);
+int storePalette(DWORD biClrUsed);
 
-void printCompressedImg(BITMAPINFOHEADER *infoHeader);
+int printCompressedImg(void);
 
-void printUncompressedImg(BITMAPINFOHEADER *infoHeader);
+int printUncompressedImg(BITMAPINFOHEADER *infoHeader);
 
 #endif /* _DISPLAY_BITMAP_H */
 // EOF

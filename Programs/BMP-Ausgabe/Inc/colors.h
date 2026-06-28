@@ -2,13 +2,13 @@
 #define _COLORS_H
 
 #include "BMP_types.h"
-#include <stdint.h>
+#include "LCD_general.h"
 
-int setPaletteColor(int i, RGBQUAD color);
+int setPaletteColor(int i, RGBQUAD rgbq);
 
-int getPaletteColor(int i, RGBTRIPLE *color);
+int getPaletteColor(int i, RGBTRIPLE *rgbOut);
 
-uint16_t getLCDcolor(RGBTRIPLE color);
+COLOR getLCDcolor(RGBTRIPLE rgb);
 
 #endif /* _COLORS_H */
 // EOF
