@@ -1,8 +1,8 @@
 /**
   *****************************************************************************
   * @file    main.c
-  * @author  Franz Korf
-  * @brief   Kleines Testprogramm fuer neu erstelle Fonts.
+  * @author  René Rudzki
+  * @brief   Ausgabe von Bitmap Dateien auf dem LCD Bildschirm des ITS-Boards
   *****************************************************************************
 */
 
