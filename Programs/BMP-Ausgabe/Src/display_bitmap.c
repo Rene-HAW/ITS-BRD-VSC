@@ -7,15 +7,14 @@
 #include "lcd.h"
 #include "input.h"
 #include "colors.h"
-#include <stdbool.h>
-#include <stdint.h>
+#include <stdlib.h>
 
 void initBMPdisplay(void) {
   GUI_init(DEFAULT_BRIGHTNESS);
   lcdPrintlnS("Waiting on Connect from programm...");
   initInput();
-  lcdPrintlnS("");
-  lcdPrintlnS("Connected! Use S0 to display your images.");
+  lcdPrintlnS("Connected!");
+  lcdGotoXY(1, 3);
 }
 
 int storePalette(DWORD biClrUsed) {
@@ -31,6 +30,7 @@ int storePalette(DWORD biClrUsed) {
   }
   return EOK;
 }
+
 
 static COLOR getPaletteLCDcolor(int i) {
   RGBTRIPLE rgbColor;
@@ -63,8 +63,9 @@ static void printDelta (POINT setX, POINT lines, Coordinate *coord, COLOR *color
 int printCompressedImg(void) {
   Coordinate coord = {0, LCD_HEIGHT};
   COLOR lineColors[LCD_WIDTH];
+  
   while (coord.y > 0) {
-    uint8_t i = 0;
+    BYTE i = 0;
     int firstByte = nextChar();
     int secondByte = nextChar();
     RETURN_NOK_ON_ERR (
@@ -79,15 +80,20 @@ int printCompressedImg(void) {
       }
     } else {
       if (secondByte > 2) {    // Absolute Mode
-        uint16_t size = ((secondByte % 2) == 1) ? secondByte+1 : secondByte;
-        uint8_t indexBytes[size];
+        WORD size = ((secondByte % 2) == 1) ? secondByte+1 : secondByte;
+        BYTE *indexBytes = malloc(size);
+        RETURN_NOK_ON_ERR (
+          indexBytes == NULL,
+          "createArray: Memory allocation failed." )
         COMread((char*) indexBytes, size, 1);
         while ( (coord.x < LCD_WIDTH) && (i < secondByte) ) {
           lineColors[coord.x] = getPaletteLCDcolor(indexBytes[i]);
           coord.x++; i++;
         }
-      } else {    // Encoded Mode
-        uint8_t offsetX, offsetY;
+        free(indexBytes);
+      }
+      else {    // Encoded Mode
+        BYTE offsetX, offsetY;
         switch (secondByte) {
           case 2:    // Delta
             offsetX = nextChar();
@@ -106,7 +112,42 @@ int printCompressedImg(void) {
   return EOK;
 }
 
-int printUncompressedImg(BITMAPINFOHEADER *infoHeader) {
+int printUncompressedImg(BITMAPINFOHEADER *info) {
+  DWORD bytesPerLine = (((unsigned)info->biWidth * info->biBitCount + 31) / 32) * 4;
+  BYTE *lineBytes = malloc(bytesPerLine);
+  RETURN_NOK_ON_ERR (
+    lineBytes == NULL,
+    "createArray: Memory allocation failed." )
   
+  Coordinate coord = {0, LCD_HEIGHT};
+  POINT limitX = (info->biWidth < LCD_WIDTH) ? info->biWidth : LCD_WIDTH;
+  POINT limitY = (info->biHeight < LCD_HEIGHT) ? (LCD_HEIGHT - info->biHeight) : 0;
+  COLOR lineColors[LCD_WIDTH];
+  
+  while (coord.y > limitY) {
+    if ( 1 != COMread((char *) lineBytes, bytesPerLine, 1) ) {
+      free(lineBytes);
+      RETURN_NOK_ON_ERR (1, "readImage: Error during read.")
+    }
+    while (coord.x < limitX) {
+      COLOR lcdColor;
+      if (info->biBitCount == 8) lcdColor = getPaletteLCDcolor( lineBytes[coord.x] );
+      else {  // (info->biBitCount == 24)
+        RGBTRIPLE rgbColor = {
+          lineBytes[coord.x * 3    ],
+          lineBytes[coord.x * 3 + 1],
+          lineBytes[coord.x * 3 + 2]
+        };
+        lcdColor = getLCDcolor(rgbColor);
+      }
+      lineColors[coord.x] = lcdColor;
+      coord.x++;
+    }
+    printDelta(0, 1, &coord, lineColors);
+  }
+  printDelta(0, coord.y, &coord, lineColors);
+  free(lineBytes);
   return EOK;
 }
+
+// EOF

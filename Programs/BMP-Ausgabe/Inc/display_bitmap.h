@@ -10,7 +10,7 @@ int storePalette(DWORD biClrUsed);
 
 int printCompressedImg(void);
 
-int printUncompressedImg(BITMAPINFOHEADER *infoHeader);
+int printUncompressedImg(BITMAPINFOHEADER *info);
 
 #endif /* _DISPLAY_BITMAP_H */
 // EOF
