@@ -46,7 +46,7 @@ int readROM(Sensor *sensor) {
     RETURN_NOK_ON_ERR ( 0 != reset(),
         "resetError: No responses from any sensors." )
     sendByte(READ_ROM);
-    for (uint8_t i=SIZE_ROM-1; i >= 0; i--)
-        sensor->rom[i] = readByte();
+    for (uint8_t i=SIZE_ROM; i > 0; i--)
+        sensor->rom[i-1] = readByte();
     return EOK;
 }

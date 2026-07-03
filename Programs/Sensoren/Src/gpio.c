@@ -10,7 +10,7 @@ int readGPIOpin(GPIO_TypeDef *GPIOx, int pin) {
     if ( (pin < MIN_GPIO_PIN) || (pin > MAX_GPIO_PIN) ) {
         return NOK;
     }
-    return ( (0x01U << pin) != (GPIOx->IDR & (0x01U << pin)) );
+    return (signed)(GPIOx->IDR & (0x01U << pin));
 }
 
 int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high) {
