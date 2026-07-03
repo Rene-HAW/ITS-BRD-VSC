@@ -174,13 +174,22 @@ project:
     - group: Program/User/Inc
       files:
         - file: ../../ITS_BRD_LIB/Inc/lcd.h
-
+        - file: Inc/errorhandler.h
+        - file: Inc/timer_ex.h
+        - file: Inc/gpio.h
+        - file: Inc/sensor.h
+        - file: Inc/one_wire.h
+        - file: Inc/lcd_print.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
       files:
         - file: Src/main.c
-
+        - file: Src/errorhandler.c
+        - file: Src/timer_ex.c
+        - file: Src/gpio.c
+        - file: Src/one_wire.c
+        - file: Src/lcd_print.c
 
   components:
     - component: ARM::CMSIS:CORE
