@@ -5,7 +5,7 @@
 
 double getTimeFrame(uint32_t start, uint32_t end);
 
-int sleep(uint32_t us);
+void sleep(double us);
 
 #endif /* _TIMER_EX_H */
 // EOF
