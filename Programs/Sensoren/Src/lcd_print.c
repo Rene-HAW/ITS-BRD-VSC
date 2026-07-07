@@ -18,16 +18,16 @@
 void initDisplay(void) {
     GUI_init(DEFAULT_BRIGHTNESS);
     lcdGotoXY(X_FAM, Y_INIT);
-    lcdPrintlnS(HEADER);
+    lcdPrintS(HEADER);
 }
 
 void resetDisplay(void) {
     GUI_clear(LCD_BACKGROUND);
     lcdGotoXY(X_FAM, Y_INIT);
-    lcdPrintlnS(HEADER);
+    lcdPrintS(HEADER);
 }
 
-void printSensorInfo(Sensor *sensor) {
+void printSensorInfo(ThermalSensor *sensor) {
     char stringBuf[SIZE_ROM_STRING];
     char *pointer = stringBuf;
     
@@ -42,7 +42,7 @@ void printSensorInfo(Sensor *sensor) {
     lcdPrintS(stringBuf);
 }
 
-void printTemperature(Sensor *sensor) {
+void printTemperature(ThermalSensor *sensor) {
     uint8_t line = Y_LIST + sensor->index;
     lcdGotoXY(X_TEMP, line);
     lcdPrintS(sensor->temperature);
@@ -52,7 +52,7 @@ void printTemperature(Sensor *sensor) {
 #define DUMMY "DS18S20 0x0102030405060708 20.500000"
 
 void dummyprint(void) {
-    Sensor test = {
+    ThermalSensor test = {
         {1,14,52,168,255,45,78,95},
         "TestTes", "24.lol", 0
     };

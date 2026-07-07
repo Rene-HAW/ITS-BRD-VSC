@@ -9,9 +9,9 @@ void initDisplay(void);
 
 void resetDisplay(void);
 
-void printSensorInfo(Sensor *sensor);
+void printSensorInfo(ThermalSensor *sensor);
 
-void printTemperature(Sensor *sensor);
+void printTemperature(ThermalSensor *sensor);
 
 void dummyprint(void);
 

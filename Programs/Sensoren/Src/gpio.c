@@ -5,12 +5,13 @@
 
 #define MIN_GPIO_PIN 0
 #define MAX_GPIO_PIN 15
+#define MASK(pin) (0x01U << (pin))
 
 int readGPIOpin(GPIO_TypeDef *GPIOx, int pin) {
     if ( (pin < MIN_GPIO_PIN) || (pin > MAX_GPIO_PIN) ) {
         return NOK;
     }
-    return (signed)(GPIOx->IDR & (0x01U << pin));
+    return ( MASK(pin) == (GPIOx->IDR & MASK(pin)) );
 }
 
 int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high) {
@@ -18,7 +19,7 @@ int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high) {
         return NOK;
     }
     int offset = (high) ? 0 : 16;
-    GPIOx->BSRR = (0x01U << (pin + offset));
+    GPIOx->BSRR = MASK(pin+offset);
     return EOK;
 }
 
@@ -27,8 +28,8 @@ int setGPIOpinMode(GPIO_TypeDef *GPIOx, int pin, int mode) {
         return NOK;
     }
     switch (mode) {
-        case PUSH_PULL: GPIOx->OTYPER &= ~(0x01U << pin); break;
-        case OPEN_DRAIN: GPIOx->OTYPER |= (0x01U << pin);
+        case PUSH_PULL: GPIOx->OTYPER &= ~MASK(pin); break;
+        case OPEN_DRAIN: GPIOx->OTYPER |= MASK(pin);
     }
     return EOK;
 }
