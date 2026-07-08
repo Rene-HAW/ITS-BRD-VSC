@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define REDO_SEARCH 1
+
 // ROM Commands
 #define SEARCH_ROM   0xF0
 #define READ_ROM     0x33
@@ -19,15 +21,19 @@
 #define READ_POWER_SUPPLY 0xB4
 
 // Store Structure
-#define SIZE_ROM  8
-#define SIZE_FAM  8
-#define SIZE_TEMP 10
+#define SIZE_ROM 8
+#define SIZE_FAM 8
+
+#define PRESENT 'P'    // Valid sensor data
+#define CHECKUP 'C'    // Check if sensor is still found during ROM search
+#define REMOVED 'R'    // Known Sensor not found after last ROM search
+#define ADDED   'A'    // New Sensor found after last ROM search
+#define EMPTY   'E'    // Invalid sensor data
 
 typedef struct {
     uint8_t rom[SIZE_ROM];
     char family[SIZE_FAM];
-    char temperature[SIZE_TEMP];
-    uint8_t index;
+    char state;
 } ThermalSensor;
 
 /**
@@ -52,12 +58,20 @@ void snsWriteByte(uint8_t val);
 uint8_t snsReadByte(void);
 
 /**
- *  @brief Reads and stores ROM for a single sensor,
-           don't use with more than one on the bus!
-    @param *sensor - Pointer to a store structure
-    @retval NOK when no slaves on the bus, EOK otherwise
+ *  @brief Reads and stores ROMs into an array for all present sensors
+ *  @param sensors[] - Array of store structures
+ *  @param arraySize - Count of elements in sensors[]
+ *  @retval NOK on error, EOK otherwise
  */
-int snsReadSingleROM(ThermalSensor *sensor);
+int snsSearchROMs(ThermalSensor sensors[], int arraySize);
+
+/**
+ *  @brief Reads and stores ROM for a single sensor,
+ *         don't use with more than one on the bus!
+ *  @param *sensor - Pointer to a store structure
+ *  @retval NOK on error, EOK otherwise
+ */
+int snsReadROM(ThermalSensor *sensor);
 
 #endif /* _SENSOR_H */
 // EOF

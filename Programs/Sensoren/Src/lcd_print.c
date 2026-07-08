@@ -21,13 +21,19 @@ void initDisplay(void) {
     lcdPrintS(HEADER);
 }
 
-void resetDisplay(void) {
-    GUI_clear(LCD_BACKGROUND);
-    lcdGotoXY(X_FAM, Y_INIT);
-    lcdPrintS(HEADER);
+void clearList(void) {
+    lcdGotoXY(X_FAM, Y_LIST);
+    for (int i=0; i < MAX_ENTRIES; i++)
+        lcdPrintlnS(" ");
 }
 
-void printSensorInfo(ThermalSensor *sensor) {
+void clearEntry(int entry) {
+    uint8_t line = Y_LIST + entry;
+    lcdGotoXY(X_FAM, line);
+    lcdPrintS(" ");
+}
+
+void printSensorInfo(ThermalSensor *sensor, int entry) {
     char stringBuf[SIZE_ROM_STRING];
     char *pointer = stringBuf;
     
@@ -35,17 +41,17 @@ void printSensorInfo(ThermalSensor *sensor) {
     for (int i=0; i < SIZE_ROM; i++)
         pointer += sprintf(pointer, "%02X", sensor->rom[i]);
 
-    uint8_t line = Y_LIST + sensor->index;
+    uint8_t line = Y_LIST + entry;
     lcdGotoXY(X_FAM, line);
     lcdPrintS(sensor->family);
     lcdGotoXY(X_ROM, line);
     lcdPrintS(stringBuf);
 }
 
-void printTemperature(ThermalSensor *sensor) {
-    uint8_t line = Y_LIST + sensor->index;
+void printTemperature(char *temp, int entry) {
+    uint8_t line = Y_LIST + entry;
     lcdGotoXY(X_TEMP, line);
-    lcdPrintS(sensor->temperature);
+    lcdPrintS(temp);
 }
 
 
@@ -54,10 +60,10 @@ void printTemperature(ThermalSensor *sensor) {
 void dummyprint(void) {
     ThermalSensor test = {
         {1,14,52,168,255,45,78,95},
-        "TestTes", "24.lol", 0
+        "TestTes", PRESENT
     };
-    printSensorInfo(&test);
-    printTemperature(&test);
+    printSensorInfo(&test, 0);
+    printTemperature("24.lol", 0);
 
     lcdGotoXY(X_FAM, Y_LIST+2);
     for (int i=2; i < MAX_ENTRIES; i++)

@@ -18,13 +18,28 @@ int main(void) {
 	initDisplay();     // Initialisierung des LCD-Bildschirms
 	initOneWire();     // Initialisierung des 1-Wire Protokolls
 
-	ThermalSensor onlyOne;
-	int state = snsReadSingleROM(&onlyOne);
-	if (state == EOK) printSensorInfo(&onlyOne);
+	ThermalSensor sensors[MAX_ENTRIES];
+	for (int i=0; i < MAX_ENTRIES; i++)
+		sensors[i].state = EMPTY;
+	int state = EOK;
 
 	// Test in Endlosschleife
 	while(1) {
-		
+		do state = snsSearchROMs(sensors, MAX_ENTRIES);
+		while (state == REDO_SEARCH);
+
+		while (state == NOK) ;
+
+		for (int i=0; i < MAX_ENTRIES; i++) {
+			if (sensors[i].state == ADDED) {
+				printSensorInfo(&sensors[i], i);
+				sensors[i].state = PRESENT;
+			}
+			if (sensors[i].state == REMOVED) {
+				clearEntry(i);
+				sensors[i].state = EMPTY;
+			}
+		}
 	}
 }
 
