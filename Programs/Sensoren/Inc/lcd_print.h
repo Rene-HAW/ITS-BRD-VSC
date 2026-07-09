@@ -9,7 +9,7 @@ void initDisplay(void);
 
 void printSensorInfo(ThermalSensor *sensor, int entry);
 
-void printTemperature(char *temp, int entry);
+void printTemperature(double temp, int entry);
 
 void clearEntry(int entry);
 

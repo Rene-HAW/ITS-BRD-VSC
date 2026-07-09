@@ -14,7 +14,6 @@
 #include "sensor.h"
 #include "gpio.h"
 #include <stdint.h>
-#include <stdio.h>
 
 #define RESET_BUTTON 0
 #define TEMP_INDEX   8
@@ -28,7 +27,6 @@ int main(void) {
 	for (int i=0; i < MAX_ENTRIES; i++)
 		sensors[i].state = EMPTY;
     uint8_t scratchpad[SIZE_PAD];
-    char temperature[11];
 	int state = EOK;
 
 	// Test in Endlosschleife
@@ -73,8 +71,7 @@ int main(void) {
                 scratchpad[j] = snsReadByte();
 
             int16_t tempData = (scratchpad[TEMP_INDEX-1] << 8) + scratchpad[TEMP_INDEX];
-            sprintf(temperature, "%+9.4f", tempData*TEMP_FACTOR);
-            printTemperature(temperature, i);
+            printTemperature(tempData * TEMP_FACTOR, i);
         }
 	}
 }
