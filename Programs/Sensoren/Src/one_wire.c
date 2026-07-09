@@ -14,6 +14,7 @@ void initOneWire(void) {
 	setGPIOpin(OUT, PD0, true);
     setGPIOpin(OUT, PD1, true);
     initTimer();
+    sleep(10*1000);
 }
 
 void busWrite(int s1, int s2) {
@@ -35,7 +36,7 @@ uint8_t busRead(int s1, int s2, int s3) {
 
 void busProvideVoltage(int ms) {
     setGPIOpinMode(OUT, PD0, PUSH_PULL);
-    sleep(ms * 1000);
+    sleep(ms*1000);
     setGPIOpinMode(OUT, PD0, OPEN_DRAIN);
 }
 

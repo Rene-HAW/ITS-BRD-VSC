@@ -7,13 +7,13 @@
 
 void initDisplay(void);
 
-void clearList(void);
-
-void clearEntry(int entry);
-
 void printSensorInfo(ThermalSensor *sensor, int entry);
 
 void printTemperature(char *temp, int entry);
+
+void clearEntry(int entry);
+
+void clearList(void);
 
 void dummyprint(void);
 

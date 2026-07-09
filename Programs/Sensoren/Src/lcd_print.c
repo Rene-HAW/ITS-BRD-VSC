@@ -21,18 +21,6 @@ void initDisplay(void) {
     lcdPrintS(HEADER);
 }
 
-void clearList(void) {
-    lcdGotoXY(X_FAM, Y_LIST);
-    for (int i=0; i < MAX_ENTRIES; i++)
-        lcdPrintlnS(" ");
-}
-
-void clearEntry(int entry) {
-    uint8_t line = Y_LIST + entry;
-    lcdGotoXY(X_FAM, line);
-    lcdPrintS(" ");
-}
-
 void printSensorInfo(ThermalSensor *sensor, int entry) {
     char stringBuf[SIZE_ROM_STRING];
     char *pointer = stringBuf;
@@ -53,6 +41,19 @@ void printTemperature(char *temp, int entry) {
     lcdGotoXY(X_TEMP, line);
     lcdPrintS(temp);
 }
+
+void clearEntry(int entry) {
+    uint8_t line = Y_LIST + entry;
+    lcdGotoXY(X_FAM, line);
+    lcdPrintS(" ");
+}
+
+void clearList(void) {
+    GUI_clear(LCD_BACKGROUND);
+    lcdGotoXY(X_FAM, Y_INIT);
+    lcdPrintS(HEADER);
+}
+
 
 
 #define DUMMY "DS18S20 0x0102030405060708 20.500000"

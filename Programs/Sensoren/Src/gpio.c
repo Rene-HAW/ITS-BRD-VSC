@@ -34,4 +34,15 @@ int setGPIOpinMode(GPIO_TypeDef *GPIOx, int pin, int mode) {
     return EOK;
 }
 
+void waitForInput(int button) {
+    LOOP_ON_ERR ( NOK == readGPIOpin(GPIOF, button),
+        "readGPIOpin: Given pin out of range." );
+    int sxHeld = 0;
+    int sxPressed = 0;
+    while( !sxPressed || sxHeld ) {
+        sxHeld = !readGPIOpin(GPIOF, button);
+        if( !sxPressed && sxHeld ) sxPressed = 1;
+    }
+}
+
 // EOF

@@ -25,6 +25,8 @@ uint8_t snsReadByte(void) {
 }
 
 
+
+#define CHECKUP   'C'    // Check if sensor is still found during ROM search
 #define CRC_STEPS  56
 #define CRC_INDEX  0
 #define FAMC_INDEX 7
@@ -35,7 +37,7 @@ typedef struct {
     uint8_t lastDiscrepancy;
 } SearchVariables;
 
-static uint8_t resolveSearch(SearchVariables *search, uint8_t romBuffer[SIZE_ROM]) { 
+static uint8_t resolveSearch(SearchVariables *search, uint8_t romBuffer[SIZE_ROM]) {
     uint8_t bit = readBit();
     uint8_t bitComp = readBit();
     uint8_t direction;
@@ -56,7 +58,7 @@ static uint8_t resolveSearch(SearchVariables *search, uint8_t romBuffer[SIZE_ROM
                 direction = (romBuffer[bufIndex] >> bufOffset) & 0x01;
             else
                 direction = (search->depth == search->lastDiscrepancy);
-        
+            
             if (direction == 0) search->lastZero = search->depth;
         }
         if (direction == 0) {
@@ -76,23 +78,25 @@ static void calcCRC(uint8_t *crc, uint8_t input) {
     if (lsBit != input) *crc ^= 0b10001100;
 }
 
+
+
 int snsSearchROMs(ThermalSensor sensors[], int arraySize) {
     int emptySlot = 0;
-    for (int i=0; i < arraySize; i++)
-        if (sensors[i].state == PRESENT) {
-            sensors[i].state = CHECKUP;
-            if (emptySlot == i) emptySlot++;
-        }
+    for (int i=0; i < arraySize; i++) {
+        if (sensors[i].state == PRESENT) sensors[i].state = CHECKUP;
+        if (sensors[i].state == ADDED  ) sensors[i].state = EMPTY;
+        if (sensors[emptySlot].state != EMPTY) emptySlot++;
+    }
     SearchVariables search = {0,0,0};
     uint8_t romBuffer[SIZE_ROM];
     uint8_t state = EOK;
-    
+
     do {
         RETURN_NOK_ON_ERR ( 0 != snsResetPulse(),
-            "resetError: No responses from any sensors." )
-        
+            "searchError: No sensors connected to the bus." )
         snsWriteByte(SEARCH_ROM);
         uint8_t crcVal = 0;
+
         while (search.depth < SIZE_ROM*8) {
             uint8_t bit = resolveSearch(&search, romBuffer);
             if (search.depth <= CRC_STEPS) calcCRC(&crcVal, bit);
@@ -101,47 +105,40 @@ int snsSearchROMs(ThermalSensor sensors[], int arraySize) {
             search.lastDiscrepancy = 0;
             state = REDO_SEARCH;
         } else {
-            int compare = 1;
-            for (int i=0; i < arraySize; i++)
-                if (sensors[i].state == CHECKUP) {
-                    compare = memcmp(sensors[i].rom, romBuffer, SIZE_ROM);
-                    if (compare == 0) { 
-                        sensors[i].state = PRESENT;
-                        i = arraySize;
-                    }
+            int romCompare = 1;
+            for (int i=0; i < arraySize; i++) if (sensors[i].state == CHECKUP) {
+                romCompare = memcmp(sensors[i].rom, romBuffer, SIZE_ROM);
+                if (romCompare == 0) { 
+                    sensors[i].state = PRESENT;
+                    i = arraySize;
                 }
-            if ( (compare != 0) && (emptySlot < arraySize) ) {
-                sensors[emptySlot].state = ADDED;
+            }
+            if ( (romCompare != 0) && (emptySlot < arraySize) ) {
                 memcpy(sensors[emptySlot].rom, romBuffer, SIZE_ROM);
                 switch (romBuffer[FAMC_INDEX]) {
                     case 0x28: strcpy(sensors[emptySlot].family, "DS18B20"); break;
                     case 0x10: strcpy(sensors[emptySlot].family, "DS18S20");
                 }
-                while ( (emptySlot < arraySize) && (sensors[emptySlot].state != EMPTY) )
-                    emptySlot++;
+                sensors[emptySlot].state = ADDED;
+                do emptySlot++;
+                while ( (emptySlot < arraySize) && (sensors[emptySlot].state != EMPTY) );
             }
             search.lastDiscrepancy = search.lastZero;
             search.lastZero = 0;
             search.depth = 0;
         }
     } while (search.lastDiscrepancy > 0);
-    
-    for (int i=0; i < arraySize; i++) {
-        if (state == REDO_SEARCH) {
-            if (sensors[i].state == ADDED) sensors[i].state = EMPTY;
-            if (sensors[i].state == CHECKUP) sensors[i].state = PRESENT;
-        } else /* state == EOK */ {
+
+    if (state == EOK)
+        for (int i=0; i < arraySize; i++)
             if (sensors[i].state == CHECKUP) sensors[i].state = REMOVED;
-        }
-    }
+    
     return state;
 }
 
-
 int snsReadROM(ThermalSensor *sensor) {
     RETURN_NOK_ON_ERR ( 0 != snsResetPulse(),
-        "resetError: No responses from any sensors." )
-    
+        "resetError: No sensors connected to the bus." )
     snsWriteByte(READ_ROM);
     uint8_t crcVal = 0;
 
@@ -156,7 +153,7 @@ int snsReadROM(ThermalSensor *sensor) {
     sensor->rom[CRC_INDEX] = snsReadByte();
     RETURN_NOK_ON_ERR ( crcVal != sensor->rom[CRC_INDEX],
         "crcError: CRC validation failed." )
-
+    
     switch (sensor->rom[FAMC_INDEX]) {
         case 0x28: strcpy(sensor->family, "DS18B20"); break;
         case 0x10: strcpy(sensor->family, "DS18S20");

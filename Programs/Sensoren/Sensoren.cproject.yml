@@ -177,8 +177,8 @@ project:
         - file: Inc/errorhandler.h
         - file: Inc/timer_ex.h
         - file: Inc/gpio.h
-        - file: Inc/sensor.h
         - file: Inc/one_wire.h
+        - file: Inc/sensor.h
         - file: Inc/lcd_print.h
 
     # Benutzerdefinierte Programmdateien
@@ -188,8 +188,8 @@ project:
         - file: Src/errorhandler.c
         - file: Src/timer_ex.c
         - file: Src/gpio.c
-        - file: Src/sensor.c
         - file: Src/one_wire.c
+        - file: Src/sensor.c
         - file: Src/lcd_print.c
 
   components:

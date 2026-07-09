@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define REDO_SEARCH 1
+#define TEMP_FACTOR 0.0625
 
 // ROM Commands
 #define SEARCH_ROM   0xF0
@@ -21,14 +22,14 @@
 #define READ_POWER_SUPPLY 0xB4
 
 // Store Structure
+#define SIZE_PAD 9
 #define SIZE_ROM 8
 #define SIZE_FAM 8
 
 #define PRESENT 'P'    // Valid sensor data
-#define CHECKUP 'C'    // Check if sensor is still found during ROM search
-#define REMOVED 'R'    // Known Sensor not found after last ROM search
-#define ADDED   'A'    // New Sensor found after last ROM search
 #define EMPTY   'E'    // Invalid sensor data
+#define ADDED   'A'    // New Sensor found after last ROM search
+#define REMOVED 'R'    // Known Sensor not found after last ROM search
 
 typedef struct {
     uint8_t rom[SIZE_ROM];
@@ -61,7 +62,7 @@ uint8_t snsReadByte(void);
  *  @brief Reads and stores ROMs into an array for all present sensors
  *  @param sensors[] - Array of store structures
  *  @param arraySize - Count of elements in sensors[]
- *  @retval NOK on error, EOK otherwise
+ *  @retval NOK if no slaves present, REDO_SEARCH if search cancelled, EOK otherwise
  */
 int snsSearchROMs(ThermalSensor sensors[], int arraySize);
 
