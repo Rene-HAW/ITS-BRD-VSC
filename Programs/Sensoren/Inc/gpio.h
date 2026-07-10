@@ -7,10 +7,30 @@
 #define PUSH_PULL  0
 #define OPEN_DRAIN 1
 
+/**
+ *  @brief Read pin state of a given GPIO
+ *  @param *GPIOx - Target GPIO
+ *  @param pin    - Target Pin
+ *  @retval NOK if invalid pin, EOK otherwise
+ */
 int readGPIOpin(GPIO_TypeDef *GPIOx, int pin);
 
+/**
+ *  @brief Set pin state of a given GPIO
+ *  @param *GPIOx - Target GPIO
+ *  @param pin    - Target Pin
+ *  @param high   - true for high, false for low
+ *  @retval NOK if invalid pin, EOK otherwise
+ */
 int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high);
 
+/**
+ *  @brief Set pin mode of a given GPIO
+ *  @param *GPIOx - Target GPIO
+ *  @param pin    - Target Pin
+ *  @param mode   - Desired mode for pin
+ *  @retval NOK if invalid pin, EOK otherwise
+ */
 int setGPIOpinMode(GPIO_TypeDef *GPIOx, int pin, int mode);
 
 /**

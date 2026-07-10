@@ -57,21 +57,4 @@ void clearList(void) {
     lcdPrintS(HEADER);
 }
 
-
-
-#define DUMMY "DS18S20 0x0102030405060708 20.500000"
-
-void dummyprint(void) {
-    ThermalSensor test = {
-        {1,14,52,168,255,45,78,95},
-        "TestTes", PRESENT
-    };
-    printSensorInfo(&test, 0);
-    printTemperature(42, 0);
-
-    lcdGotoXY(X_FAM, Y_LIST+2);
-    for (int i=2; i < MAX_ENTRIES; i++)
-        lcdPrintlnS(DUMMY);
-}
-
 // EOF
