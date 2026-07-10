@@ -27,9 +27,9 @@
  * Code for USART RX DMA 
  */
 
-#include "..\..\stm32cubef4\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_ll_bus.h"
-#include "..\..\stm32cubef4\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_ll_dma.h"
-#include "..\..\stm32cubef4\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_ll_usart.h"
+#include "../../stm32cubef4/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_bus.h"
+#include "../../stm32cubef4/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_dma.h"
+#include "../../stm32cubef4/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usart.h"
 
 // RX ring buffer for RX DMA controller
 #define SIZE_OF_RING_BUFFER         (3*BUF_SIZE)
