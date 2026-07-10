@@ -1,8 +1,8 @@
 /**
   *****************************************************************************
   * @file    main.c
-  * @author  Franz Korf
-  * @brief   Kleines Testprogramm fuer neu erstelle Fonts.
+  * @author  Rene Rudzki
+  * @brief   Programm zum Lesen und Anzeigen von gemessenen Temperaturen
   *****************************************************************************
 */
 
