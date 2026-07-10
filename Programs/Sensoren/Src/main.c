@@ -52,15 +52,12 @@ int main(void) {
 				sensors[i].state = EMPTY;
 			}
 		}
+        snsResetPulse();
+        snsWriteByte(SKIP_ROM);
+        snsWriteByte(CONVERT_T);
+        busProvideVoltage(800);
+
         for (int i=0; i < MAX_ENTRIES; i++) if (sensors[i].state == PRESENT) {
-            snsResetPulse();
-            snsWriteByte(MATCH_ROM);
-            for (int j=SIZE_ROM-1; j >= 0; j--)
-                snsWriteByte(sensors[i].rom[j]);
-
-            snsWriteByte(CONVERT_T);
-            busProvideVoltage(800);
-
             snsResetPulse();
             snsWriteByte(MATCH_ROM);
             for (int j=SIZE_ROM-1; j >= 0; j--)

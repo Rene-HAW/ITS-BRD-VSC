@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /**
- *  @brief Init components for the 1-wire bus protocol
+ *  @brief Initialize components for the 1-wire bus protocol
  *  @param None
  *  @retval None
  */
