@@ -1,8 +1,19 @@
 #include "operations.h"
+#include "main.h"
 #include "timer.h"
+#include "gpio.h"
+#include "state_machine.h"
+#include <stdint.h>
 #include <stdio.h>
 
 #define STEPS_PER_CYCLE 1200  // Phasenwechsel pro 360° Umdrehung
+
+PrintBuffer newBuffer(void) {
+    PrintBuffer buffer;
+    buffer.printIndex[0] = NO_PRINT;
+    buffer.next = 0;
+    return buffer;
+}
 
 double calcTimeFrame(uint32_t start, uint32_t end) {
     double frame;
@@ -43,11 +54,26 @@ void updateBuffer(PrintBuffer *buffer, char newString[PRINT_SIZE]) {
     buffer->next = 0;
 }
 
-PrintBuffer newBuffer(void) {
-    PrintBuffer buffer;
-    buffer.printIndex[0] = NO_PRINT;
-    buffer.next = 0;
-    return buffer;
+void setLEDcounter(int steps) {
+    if (steps < 0) steps = -steps;
+    uint16_t stepsDisplayed = (uint16_t)( steps % (UINT8_MAX+1) );
+    setGPIOpinMask(OUT_COUNT, stepsDisplayed);
+}
+
+void setLEDstate(int move) {
+    switch(move) {
+        case FORWARD:
+            setGPIOpinMask(OUT_STATE, MASK_FORW); break;
+        case BACKWARD:
+            setGPIOpinMask(OUT_STATE, MASK_BACK); break;
+        case UNKNOWN:
+            setGPIOpinMask(OUT_STATE, MASK_NOK);
+    }
+}
+
+void resetLED(void) {
+    setGPIOpinMask(OUT_STATE, 0x00U);
+    setGPIOpinMask(OUT_COUNT, 0x00U);
 }
 
 // EOF

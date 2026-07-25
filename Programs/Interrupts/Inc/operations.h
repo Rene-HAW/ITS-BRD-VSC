@@ -11,6 +11,8 @@ typedef struct {
     int next;
 } PrintBuffer;
 
+PrintBuffer newBuffer(void);
+
 double calcTimeFrame(uint32_t start, uint32_t end);
 
 void calcAngle(char out[], int steps);
@@ -19,7 +21,11 @@ void calcSpeed(char out[], int steps, double timeFrame);
 
 void updateBuffer(PrintBuffer *buffer, char newString[PRINT_SIZE]);
 
-PrintBuffer newBuffer(void);
+void setLEDcounter(int steps);
+
+void setLEDstate(int move);
+
+void resetLED(void);
 
 #endif /* OPERATIONS_H */
 // EOF

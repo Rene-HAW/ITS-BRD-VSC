@@ -1,5 +1,5 @@
 #include "state_machine.h"
-#include "main.h"
+#include "errorhandler.h"
 
 static char currentPhase = 's';
 
@@ -17,7 +17,7 @@ static int fsm(char newPhase) {
                     return BACKWARD;
                 default:
                     currentPhase = 'e';
-                    return INTERNAL_ERR;
+                    return UNKNOWN;
             }
 
         case 'b':
@@ -32,7 +32,7 @@ static int fsm(char newPhase) {
                     return FORWARD;
                 default:
                     currentPhase = 'e';
-                    return INTERNAL_ERR;
+                    return UNKNOWN;
             }
 
         case 'c':
@@ -47,7 +47,7 @@ static int fsm(char newPhase) {
                     return FORWARD;
                 default:
                     currentPhase = 'e';
-                    return INTERNAL_ERR;
+                    return UNKNOWN;
             }
 
         case 'd':
@@ -62,7 +62,7 @@ static int fsm(char newPhase) {
                     return STANDSTILL;
                 default:
                     currentPhase = 'e';
-                    return INTERNAL_ERR;
+                    return UNKNOWN;
             }
 
         case 's':
@@ -72,12 +72,12 @@ static int fsm(char newPhase) {
                     return STANDSTILL;
                 default:
                     currentPhase = 'e';
-                    return INTERNAL_ERR;
+                    return UNKNOWN;
             }
         
         default:
             currentPhase = 'e';
-            return INTERNAL_ERR;
+            return UNKNOWN;
     }
 }
 
@@ -88,20 +88,16 @@ int encodeInput(int in1State, int in0State, int *move, int *steps) {
     } else /* !in1State */ {
         phase = (in0State) ? 'd' : 'a';
     }
-    switch ( fsm(phase) ) {
-        case FORWARD:
-            *move = FORWARD;
-            *steps += 1;
-            return EOK;
-        case BACKWARD:
-            *move = BACKWARD;
-            *steps -= 1;
-            return EOK;
-        case STANDSTILL:
-            *move = STANDSTILL;
-            return EOK;
+    *move = fsm(phase);
+
+    RETURN_NOK_ON_ERR( *move == UNKNOWN,
+        "phaseError: Move direction of encoder could not be determined." )
+    
+    switch (*move) {
+        case FORWARD:  *steps += 1; break;
+        case BACKWARD: *steps -= 1;
     }
-    return INTERNAL_ERR;
+    return EOK;
 }
 
 void resetMachine(void) {

@@ -1,62 +1,43 @@
 #include "gpio.h"
-#include "main.h"
+#include "errorhandler.h"
+#include "stm32f429xx.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 #define MIN_GPIO_PIN 0
 #define MAX_GPIO_PIN 15
+#define MASK(pin) (0x01U << (pin))
 
 int readGPIOpin(GPIO_TypeDef *GPIOx, int pin) {
     if ( (pin < MIN_GPIO_PIN) || (pin > MAX_GPIO_PIN) ) {
-        return INTERNAL_ERR;
+        return NOK;
     }
-    return ( (0x01U << pin) != (GPIOx->IDR & (0x01U << pin)) );
+    return ( MASK(pin) == (GPIOx->IDR & MASK(pin)) );
 }
 
-int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool on) {
+int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high) {
     if ( (pin < MIN_GPIO_PIN) || (pin > MAX_GPIO_PIN) ) {
-        return INTERNAL_ERR;
+        return NOK;
     }
-    int offset = (on) ? 0 : 16;
-
-    GPIOx->BSRR = (0x01U << (pin + offset));
+    int offset = (high) ? 0 : 16;
+    GPIOx->BSRR = MASK(pin+offset);
     return EOK;
 }
 
-static void setGPIOpinMask(GPIO_TypeDef *GPIOx, uint16_t mask) {
+void setGPIOpinMask(GPIO_TypeDef *GPIOx, uint16_t mask) {
     GPIOx->BSRR = (uint32_t)(~mask << 16);
     GPIOx->BSRR = mask;
 }
 
-void setLEDstate(int move) {
-    switch(move) {
-        case FORWARD:
-            setGPIOpin(OUT_STATE, D23, true);
-            setGPIOpin(OUT_STATE, D22, false);
-            setGPIOpin(OUT_STATE, D21, false);
-            break;
-        case BACKWARD:
-            setGPIOpin(OUT_STATE, D23, false);
-            setGPIOpin(OUT_STATE, D22, true);
-            setGPIOpin(OUT_STATE, D21, false);
-            break;
-        case INTERNAL_ERR:
-            setGPIOpin(OUT_STATE, D23, false);
-            setGPIOpin(OUT_STATE, D22, false);
-            setGPIOpin(OUT_STATE, D21, true);
+void waitForInput(int button) {
+    LOOP_ON_ERR( NOK == readGPIOpin(GPIOF, button),
+        "readGPIOpin: Given pin out of range." );
+    int sxHeld = 0;
+    int sxPressed = 0;
+    while( !sxPressed || sxHeld ) {
+        sxHeld = !readGPIOpin(GPIOF, button);
+        if( !sxPressed && sxHeld ) sxPressed = 1;
     }
-}
-
-void setLEDcounter(int steps) {
-    if (steps < 0) steps = -steps;
-    uint16_t stepsDisplayed = (uint16_t)( steps % (UINT8_MAX+1) );
-    setGPIOpinMask(OUT_COUNT, stepsDisplayed);
-}
-
-void resetLED(void) {
-    setGPIOpin(OUT_STATE, D23, false);
-    setGPIOpin(OUT_STATE, D22, false);
-    setGPIOpin(OUT_STATE, D21, false);
-    setGPIOpinMask(OUT_COUNT, 0x00U);
 }
 
 // EOF

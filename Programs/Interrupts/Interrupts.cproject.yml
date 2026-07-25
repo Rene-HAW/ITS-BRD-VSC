@@ -179,6 +179,7 @@ project:
         - file: Inc/state_machine.h
         - file: Inc/operations.h
         - file: Inc/lcd_print.h
+        - file: Inc/errorhandler.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
@@ -188,6 +189,7 @@ project:
         - file: Src/state_machine.c
         - file: Src/operations.c
         - file: Src/lcd_print.c
+        - file: Src/errorhandler.c
 
   components:
     - component: ARM::CMSIS:CORE

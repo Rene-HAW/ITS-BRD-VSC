@@ -3,15 +3,14 @@
 
 #include "stm32f429xx.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 int readGPIOpin(GPIO_TypeDef *GPIOx, int pin);
 
-int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool on);
+int setGPIOpin(GPIO_TypeDef *GPIOx, int pin, bool high);
 
-void setLEDstate(int move);
+void setGPIOpinMask(GPIO_TypeDef *GPIOx, uint16_t mask);
 
-void setLEDcounter(int steps);
-
-void resetLED(void);
+void waitForInput(int button);
 
 #endif /* GPIO_H */
