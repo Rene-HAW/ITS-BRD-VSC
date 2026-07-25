@@ -1,7 +1,7 @@
 #include "operations.h"
 #include "main.h"
-#include "timer.h"
 #include "gpio.h"
+#include "timer.h"
 #include "state_machine.h"
 #include <stdint.h>
 #include <stdio.h>
