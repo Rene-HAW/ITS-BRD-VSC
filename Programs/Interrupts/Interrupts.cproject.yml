@@ -180,6 +180,7 @@ project:
         - file: Inc/operations.h
         - file: Inc/lcd_print.h
         - file: Inc/errorhandler.h
+        - file: Inc/test.h
 
     # Benutzerdefinierte Programmdateien
     - group: Program/User/Src
@@ -190,6 +191,7 @@ project:
         - file: Src/operations.c
         - file: Src/lcd_print.c
         - file: Src/errorhandler.c
+        - file: Src/test.c
 
   components:
     - component: ARM::CMSIS:CORE

@@ -20,7 +20,7 @@
 #define MIN_TIME 250  // ms
 #define MAX_TIME 500  // ms
 
-int main(void) {
+int main_temp(void) {
   // Initialisierung ITS Board und interne Variabeln
   initITSboard();
   int move = STANDSTILL;
@@ -98,6 +98,13 @@ int main(void) {
       frameStart = getTimeStamp();
     }
 	}
+}
+
+#include "test.h"
+
+int main(void) {
+  // main_temp();
+  main_test();
 }
 
 // EOF
