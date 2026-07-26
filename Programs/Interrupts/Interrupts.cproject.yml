@@ -180,6 +180,7 @@ project:
         - file: Inc/operations.h
         - file: Inc/lcd_print.h
         - file: Inc/errorhandler.h
+        - file: Inc/interrupts.h
         - file: Inc/test.h
 
     # Benutzerdefinierte Programmdateien
@@ -191,6 +192,7 @@ project:
         - file: Src/operations.c
         - file: Src/lcd_print.c
         - file: Src/errorhandler.c
+        - file: Src/interrupts.c
         - file: Src/test.c
 
   components:
