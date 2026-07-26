@@ -24,7 +24,7 @@ void EXTI1_IRQHandler(void) {
 }
 
 void EXTI0_IRQHandler(void) {
-    EXTI->PR = EXTI_PR_PR1;
+    EXTI->PR = EXTI_PR_PR0;
 
 }
 
